@@ -170,11 +170,28 @@ System.out.println(sum);
 </div>
 
 </div>
+    <script>
 
-<script>
+// 👤 Get user name
+let user = prompt("Enter your name");
 
-// Anti-refresh
+// 📡 Send to Google Form
+function sendToAdmin(status, score = 0, timeTaken = 0) {
+    fetch("https://docs.google.com/forms/d/e/1FAIpQLScj5kNxPN0iYkZrG80qCru9H294VciDucjfVRyF8IyXqC4pWQ/formResponse", {
+        method: "POST",
+        mode: "no-cors",
+        body: new URLSearchParams({
+            "entry.1250727632": user,
+            "entry.1223269971": status,
+            "entry.721504128": score,
+            "entry.193469030": timeTaken
+        })
+    });
+}
+
+// 🔒 Anti-refresh
 if (sessionStorage.getItem("started")) {
+    sendToAdmin("DISQUALIFIED (REFRESH)");
     document.body.innerHTML = "<h2 style='color:red'>❌ Disqualified (Refresh)</h2>";
 }
 sessionStorage.setItem("started","true");
@@ -192,9 +209,11 @@ let timer;
 function startTimer(){
     clearInterval(timer);
     time = 60;
+
     timer = setInterval(()=>{
         document.getElementById("timer").innerText = "Time: " + time;
         time--;
+
         if(time < 0){
             disqualify("Time up!");
         }
@@ -205,10 +224,12 @@ function startTimer(){
 function next(){
     document.getElementById("q"+(current+1)).classList.add("hidden");
     current++;
+
     if(current == 7){
         finish();
         return;
     }
+
     document.getElementById("q"+(current+1)).classList.remove("hidden");
     startTimer();
 }
@@ -231,22 +252,29 @@ function check5(){check(a5.value)}
 function check6(){check(a6.value)}
 function check7(){check(a7.value)}
 
-// Disqualify
+// ❌ Disqualify
 function disqualify(msg){
     clearInterval(timer);
+
+    sendToAdmin("DISQUALIFIED (TIME)");
+
     document.body.innerHTML = `<h2 style="color:red">❌ Disqualified</h2><p>${msg}</p>`;
 }
 
-// Finish
+// 🎉 Finish
 function finish(){
     clearInterval(timer);
+
+    let timeTaken = 60 - time;
+
+    sendToAdmin("COMPLETED", 7, timeTaken);
+
     document.body.innerHTML = `<h2>🎉 Quiz Completed!</h2>`;
 }
 
-// Start first timer
+// Start timer
 startTimer();
 
-</script>
-
+    </script>
 </body>
 </html>
