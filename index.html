@@ -12,10 +12,7 @@ body {
     color: white;
     text-align: center;
     margin: 0;
-    padding: 0;
 }
-
-/* Container */
 .quiz-box {
     width: 90%;
     max-width: 500px;
@@ -25,8 +22,6 @@ body {
     border-radius: 10px;
     background: #020617;
 }
-
-/* Code block */
 pre {
     text-align: left;
     background: #020617;
@@ -34,10 +29,7 @@ pre {
     border: 1px solid #334155;
     border-radius: 6px;
     overflow-x: auto;
-    font-size: 14px;
 }
-
-/* Inputs */
 input {
     padding: 12px;
     width: 90%;
@@ -45,34 +37,18 @@ input {
     background: #0f172a;
     color: white;
     border: 1px solid #38bdf8;
-    border-radius: 5px;
-    font-size: 16px;
 }
-
-/* Button */
 button {
     padding: 12px 20px;
     background: #38bdf8;
     border: none;
-    border-radius: 5px;
-    font-size: 16px;
     cursor: pointer;
 }
-
-button:hover {
-    background: #0ea5e9;
-}
-
-/* Timer */
 .timer {
     color: #f87171;
     font-size: 20px;
-    margin: 10px;
 }
-
-.hidden {
-    display: none;
-}
+.hidden { display: none; }
 </style>
 </head>
 
@@ -81,139 +57,119 @@ button:hover {
 <h1>⚡ Chained IT Quiz ⚡</h1>
 <p>Correct answer unlocks next question • 60 sec per question</p>
 
-<div class="timer" id="timer">Time: 60</div>
+<div>
+<input id="username" placeholder="Enter your name">
+<button onclick="startQuiz()">Start</button>
+</div>
 
-<div class="quiz-box" id="quizBox">
+<div class="timer hidden" id="timer">Time: 60</div>
+
+<div class="quiz-box hidden" id="quizBox">
 
 <div id="q1">
-<h3>Q1 (C)</h3>
-<pre>
-int x = 5;
-x = x++ + ++x;
-printf("%d", x);
-</pre>
-<input id="a1">
-<button onclick="check1()">Submit</button>
+<pre>int x = 5; x = x++ + ++x; printf("%d", x);</pre>
+<input id="a1"><button onclick="check1()">Submit</button>
 </div>
 
 <div id="q2" class="hidden">
-<h3>Q2 (Java)</h3>
-<pre>
-int a = A1;
-int b = a++ * 2 + --a;
-System.out.println(b);
-</pre>
-<input id="a2">
-<button onclick="check2()">Submit</button>
+<pre>int a = A1; int b = a++ * 2 + --a;</pre>
+<input id="a2"><button onclick="check2()">Submit</button>
 </div>
 
 <div id="q3" class="hidden">
-<h3>Q3 (C)</h3>
-<pre>
-int x = A2;
-int y = x ^ (x << 1);
-printf("%d", y);
-</pre>
-<input id="a3">
-<button onclick="check3()">Submit</button>
+<pre>int x = A2; int y = x ^ (x << 1);</pre>
+<input id="a3"><button onclick="check3()">Submit</button>
 </div>
 
 <div id="q4" class="hidden">
-<h3>Q4 (Java)</h3>
-<pre>
-String s = "A3";
-System.out.println(s + 5 + 5);
-</pre>
-<input id="a4">
-<button onclick="check4()">Submit</button>
+<pre>String s = "A3"; System.out.println(s + 5 + 5);</pre>
+<input id="a4"><button onclick="check4()">Submit</button>
 </div>
 
 <div id="q5" class="hidden">
-<h3>Q5 (HTML + JS)</h3>
-<pre>
-let x = "A4";
-let result = x - 10;
-document.write(result);
-</pre>
-<input id="a5">
-<button onclick="check5()">Submit</button>
+<pre>let x = "A4"; let r = x - 10;</pre>
+<input id="a5"><button onclick="check5()">Submit</button>
 </div>
 
 <div id="q6" class="hidden">
-<h3>Q6 (C)</h3>
-<pre>
-int n = A5;
-int count = 0;
-while(n > 0) {
-    n = n / 2;
-    count++;
-}
-printf("%d", count);
-</pre>
-<input id="a6">
-<button onclick="check6()">Submit</button>
+<pre>while(n > 0){ n /= 2; count++; }</pre>
+<input id="a6"><button onclick="check6()">Submit</button>
 </div>
 
 <div id="q7" class="hidden">
-<h3>Q7 (Java)</h3>
-<pre>
-int x = A6;
-int sum = 0;
-for(int i = 0; i < x; i++) {
-    if(i % 2 == 0)
-        sum += i;
-}
-System.out.println(sum);
-</pre>
-<input id="a7">
-<button onclick="check7()">Submit</button>
+<pre>sum of even numbers less than x</pre>
+<input id="a7"><button onclick="check7()">Submit</button>
 </div>
 
 </div>
 
 <script>
 
-// Anti-refresh
+// 🔴 USER NAME
+let user = "";
+
+// 🔒 REFRESH DETECTION
 if (sessionStorage.getItem("started")) {
-    document.body.innerHTML = "<h2 style='color:red'>❌ Disqualified (Refresh)</h2>";
+    sendToAdmin("DISQUALIFIED (REFRESH)");
+
+    document.body.innerHTML = `
+        <h2 style="color:red">❌ Disqualified</h2>
+        <p>Refresh detected</p>
+    `;
 }
 sessionStorage.setItem("started","true");
 
-// Disable right-click
+// 🔒 Disable right click
 document.addEventListener("contextmenu", e => e.preventDefault());
 
+// ✅ ANSWERS
 let answers = ["12","36","108","10855","10845","14","42"];
 
 let current = 0;
 let time = 60;
 let timer;
 
-// Timer
+// 🚀 START QUIZ
+function startQuiz(){
+    user = document.getElementById("username").value.trim();
+    if(!user) return alert("Enter your name");
+
+    document.getElementById("quizBox").classList.remove("hidden");
+    document.getElementById("timer").classList.remove("hidden");
+
+    startTimer();
+}
+
+// ⏱ TIMER
 function startTimer(){
     clearInterval(timer);
     time = 60;
+
     timer = setInterval(()=>{
         document.getElementById("timer").innerText = "Time: " + time;
         time--;
+
         if(time < 0){
             disqualify("Time up!");
         }
     },1000);
 }
 
-// Next question
+// ➡ NEXT
 function next(){
     document.getElementById("q"+(current+1)).classList.add("hidden");
     current++;
+
     if(current == 7){
         finish();
         return;
     }
+
     document.getElementById("q"+(current+1)).classList.remove("hidden");
     startTimer();
 }
 
-// Check answer
+// ✔ CHECK
 function check(val){
     if(val.trim() === answers[current]){
         next();
@@ -222,7 +178,7 @@ function check(val){
     }
 }
 
-// Functions
+// CALLS
 function check1(){check(a1.value)}
 function check2(){check(a2.value)}
 function check3(){check(a3.value)}
@@ -231,20 +187,44 @@ function check5(){check(a5.value)}
 function check6(){check(a6.value)}
 function check7(){check(a7.value)}
 
-// Disqualify
+// ❌ DISQUALIFY
 function disqualify(msg){
     clearInterval(timer);
-    document.body.innerHTML = `<h2 style="color:red">❌ Disqualified</h2><p>${msg}</p>`;
+
+    sendToAdmin("DISQUALIFIED (TIME)");
+
+    document.body.innerHTML = `
+        <h2 style="color:red">❌ Disqualified</h2>
+        <p>${msg}</p>
+    `;
 }
 
-// Finish
+// 🎉 FINISH
 function finish(){
     clearInterval(timer);
-    document.body.innerHTML = `<h2>🎉 Quiz Completed!</h2>`;
+
+    let timeTaken = 60 - time;
+
+    sendToAdmin("COMPLETED", 7, timeTaken);
+
+    document.body.innerHTML = `
+        <h2>🎉 Completed</h2>
+    `;
 }
 
-// Start first timer
-startTimer();
+// 📡 SEND TO GOOGLE FORM
+function sendToAdmin(status, score = 0, timeTaken = 0) {
+    fetch("https://docs.google.com/forms/d/e/1FAIpQLScYItBNrpLSco3ks9qLoZuHfe13IbnEMyvBgCfdplkDgUMSew/formResponse", {
+        method: "POST",
+        mode: "no-cors",
+        body: new URLSearchParams({
+            "entry.670843152": user,
+            "entry.1945671437": status,
+            "entry.2129597429": score,
+            "entry.425413919": timeTaken
+        })
+    });
+}
 
 </script>
 
