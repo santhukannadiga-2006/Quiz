@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Chained IT Quiz</title>
+<style>
+body {
+    font-family: Consolas;
+    background: #0f172a;
+    color: white;
+    text-align: center;
+}
+.quiz-box {
+    width: 650px;
+    margin: auto;
+    padding: 20px;
+    border: 2px solid #38bdf8;
+}
+input, button {
+    padding: 10px;
+    margin: 10px;
+}
+.hidden { display: none; }
+.timer { color: red; }
+</style>
+</head>
+
+<body>
+
+<h1>⚡ Chained IT Quiz ⚡</h1>
+
+<div id="startBox">
+    <h3>Enter Your Name</h3>
+    <input type="text" id="username">
+    <button onclick="startQuiz()">Start Quiz</button>
+</div>
+
+<div class="timer hidden" id="timer">Time: 60</div>
+
+<div class="quiz-box hidden" id="quizBox">
+
+<div id="q1">
+<pre>int x=5; x=x++ + ++x; printf("%d",x);</pre>
+<input id="a1"><button onclick="check1()">Submit</button>
+</div>
+
+<div id="q2" class="hidden">
+<pre>int a=A1; int b=a++*2+--a;</pre>
+<input id="a2"><button onclick="check2()">Submit</button>
+</div>
+
+<div id="q3" class="hidden">
+<pre>int x=A2; int y=x^(x<<1);</pre>
+<input id="a3"><button onclick="check3()">Submit</button>
+</div>
+
+<div id="q4" class="hidden">
+<pre>String s="A3"; System.out.println(s+5+5);</pre>
+<input id="a4"><button onclick="check4()">Submit</button>
+</div>
+
+<div id="q5" class="hidden">
+<pre>let x="A4"; let r=x-10;</pre>
+<input id="a5"><button onclick="check5()">Submit</button>
+</div>
+
+<div id="q6" class="hidden">
+<pre>while(n>0){n/=2;count++;}</pre>
+<input id="a6"><button onclick="check6()">Submit</button>
+</div>
+
+<div id="q7" class="hidden">
+<pre>sum of even numbers less than x</pre>
+<input id="a7"><button onclick="check7()">Submit</button>
+</div>
+
+</div>
+
+<script>
+
+// Anti-refresh
+if (sessionStorage.getItem("started")) {
+    document.body.innerHTML = "<h2 style='color:red'>❌ Disqualified (Refresh)</h2>";
+}
+sessionStorage.setItem("started","true");
+
+// Disable right click
+document.addEventListener("contextmenu", e => e.preventDefault());
+
+// Answers
+let answers = ["12","36","108","10855","10845","14","42"];
+
+let current = 0;
+let time = 60;
+let timer;
+let user = "";
+
+function startQuiz(){
+    user = document.getElementById("username").value;
+    if(!user) return alert("Enter name");
+
+    document.getElementById("startBox").classList.add("hidden");
+    document.getElementById("quizBox").classList.remove("hidden");
+    document.getElementById("timer").classList.remove("hidden");
+
+    startTimer();
+}
+
+function startTimer(){
+    clearInterval(timer);
+    time = 60;
+    timer = setInterval(()=>{
+        document.getElementById("timer").innerText="Time:"+time;
+        time--;
+        if(time<0) disqualify("Time up!");
+    },1000);
+}
+
+function next(){
+    document.getElementById("q"+(current+1)).classList.add("hidden");
+    current++;
+    if(current==7) return finish();
+    document.getElementById("q"+(current+1)).classList.remove("hidden");
+    startTimer();
+}
+
+function check(val){
+    if(val.trim()===answers[current]) next();
+    else alert("❌ Wrong");
+}
+
+function check1(){check(a1.value)}
+function check2(){check(a2.value)}
+function check3(){check(a3.value)}
+function check4(){check(a4.value)}
+function check5(){check(a5.value)}
+function check6(){check(a6.value)}
+function check7(){check(a7.value)}
+
+function disqualify(msg){
+    clearInterval(timer);
+    document.body.innerHTML = `<h2 style="color:red">❌ Disqualified</h2><p>${msg}</p>`;
+}
+
+function finish(){
+    clearInterval(timer);
+
+    let scores = JSON.parse(localStorage.getItem("scores")||"[]");
+    scores.push({name:user, score:7});
+    localStorage.setItem("scores", JSON.stringify(scores));
+
+    let sorted = scores.sort((a,b)=>b.score-a.score);
+
+    let list = sorted.map(s=>`${s.name} - ${s.score}`).join("<br>");
+
+    document.body.innerHTML = `
+        <h2>🎉 Completed</h2>
+        <h3>🏆 Leaderboard</h3>
+        ${list}
+    `;
+}
+
+</script>
+
+</body>
+  </html>
